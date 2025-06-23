@@ -5,18 +5,17 @@ import { useEffect, useState } from "react";
 export default function ResultsPage() {
   const params = useSearchParams();
 
-  const keyword = params.get("keyword") || "東京";
-  const checkinDate = params.get("checkinDate") || "2025-07-10";
-  const adultNum = params.get("adultNum") || "1";
+  const regionCode = params.get("regionCode") ; 
+  const checkinDate = params.get("checkinDate");
+  const checkoutDate = params.get("checkoutDate") ;
+  const adultNum = params.get("adultNum");
 
   const [hotels, setHotels] = useState([]);
 
   useEffect(() => {
     const fetchHotels = async () => {
-      const url = `https://app.rakuten.co.jp/services/api/Travel/VacantHotelSearch/20170426?applicationId=1061047019507500369&format=json&keyword=${encodeURIComponent(
-        keyword
-      )}&checkinDate=${checkinDate}&adults=${adultNum}&hits=10`;
-
+      const url = `https://app.rakuten.co.jp/services/api/Travel/VacantHotelSearch/20170426?applicationId=1061047019507500369&format=json&largeClassCode=japan&middleClassCode=${regionCode}&smallClassCode=sendai&checkinDate=${checkinDate}&checkoutDate=${checkinDate}&adultNum=2&sort=+roomCharge`;
+      
       const res = await fetch(url);
       const data = await res.json();
       console.log("楽天APIの返り値:", data);
@@ -29,12 +28,12 @@ export default function ResultsPage() {
     };
 
     fetchHotels();
-  }, [keyword, checkinDate, adultNum]);
+  }, [regionCode, checkinDate, adultNum]);
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">
-        検索結果：{keyword}（{checkinDate}〜 / 大人{adultNum}人）
+        検索結果：{regionCode}（{checkinDate}〜 / 大人{adultNum}人）
       </h1>
       {hotels.length === 0 ? (
         <p>空いてる宿が見つかりませんでした。</p>
@@ -54,7 +53,9 @@ export default function ResultsPage() {
                   詳細を見る
                 </a>
               </p>
-              <p>料金: ¥{h.hotel[0].hotelBasicInfo.hotelMinCharge?.toLocaleString()}</p>
+              <p>rakutenCharge{h.hotel[1].roomInfo[1].dailyCharge.rakutenCharge.toLocaleString()}</p>
+
+
             </li>
           ))}
         </ul>
